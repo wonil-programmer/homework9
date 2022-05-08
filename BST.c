@@ -68,7 +68,7 @@ int main()
 			break;
 
 		case 'd': case 'D':
-            /* 리프노드 삭제 */
+            /* key에 해당하는 리프노드를 삭제 */
 			printf("Your Key = ");
 			scanf("%d", &key);
 			deleteLeafNode(head, key);
@@ -189,7 +189,7 @@ int insert(Node* head, int key)
 
 	Node* parentNode = NULL; // 노드 구조체 포인터 parentNode
 
-    // 
+    // ptr이 리프노드를 가리킬 때까지 반복
 	while(ptr != NULL) {
 
 		/* 해당 key의 노드가 존재할 경우 함수 종료 */
@@ -197,85 +197,87 @@ int insert(Node* head, int key)
 
 		parentNode = ptr; // parentNode는 ptr을 따라감
 
-		/* key comparison, if current node's key is greater than input key
-		 * then the new node has to be inserted into the right subtree;
-		 * otherwise the left subtree.
-		 */
         /* 현재 노드의 key가 삽입될 노드의 key보다 작은 경우 */
 		if(ptr->key < key)
 			ptr = ptr->right; // ptr을 ptr의 오른쪽 자식 노드를 가리키게 함
+ 
         /* 현재 노드의 key가 삽입될 노드의 key보다 큰 경우 */
 		else
 			ptr = ptr->left; // ptr을 ptr의 왼쪽 자식 노드를 가리키게 함
 	}
-
-	/* linking the new node to the parent */
-	if(parentNode->key > key)
+    
+	/* 새로운 노드를 부모노드의 자식노드로 삽입 */
+	if(parentNode->key > key) 
 		parentNode->left = newNode;
+        // 부모노드의 key가 삽입할 노드의 key보다 큰 경우, 왼쪽 자식노드에 삽입
 	else
 		parentNode->right = newNode;
+        // 부모노드의 key가 삽입할 노드의 key보다 작은 경우, 오른쪽 자식노드에 삽입
+
 	return 1;
 }
 
-/* 리프노드를 삭제하는 함수 */
+/* 특정 key의 리프노드를 삭제하는 함수 */
 int deleteLeafNode(Node* head, int key)
 {
+    /* head가 NULL인 경우, 즉 빈 트리인 경우 경고문 출력 후 함수 종료 */
 	if (head == NULL) {
 		printf("\n Nothing to delete!!\n");
+
 		return -1;
 	}
 
+    /* head의 left가 NULL인 경우, 즉 트리의 노드가 하나인 경우 경고문 출력 후 함수 종료 */
 	if (head->left == NULL) {
 		printf("\n Nothing to delete!!\n");
+
 		return -1;
 	}
 
-	/* head->left is the root */
-	Node* ptr = head->left;
+	
+	Node* ptr = head->left; // ptr이 head의 왼쪽 자식노드를 가리키게 함
 
+	Node* parentNode = head; // ptr를 따라다니며 ptr의 부모노드를 가리키는 노드 구조체 포인터 parentNode
 
-	/* we have to move onto children nodes,
-	 * keep tracking the parent using parentNode */
-	Node* parentNode = head;
-
+    /* ptr이 리프노드를 가리킬 때까지 반복 */
 	while(ptr != NULL) {
 
+        /* ptr의 key가 삭제할 key인 경우 */
 		if(ptr->key == key) {
+            /* ptr이 리프노드인 경우 */
 			if(ptr->left == NULL && ptr->right == NULL) {
-
-				/* root node case */
+				/* 부모노드가 head인 경우 */
 				if(parentNode == head)
-					head->left = NULL;
-
-				/* left node case or right case*/
+					head->left = NULL; // head의 왼쪽 자식노드를 삭제
+                
+                /* 부모노드의 왼쪽 자식노드가 ptr인 경우 */
 				if(parentNode->left == ptr)
-					parentNode->left = NULL;
+					parentNode->left = NULL; // 부모의 왼쪽 자식노드를 삭제
+                /* 부모노드의 오른쪽 자식노드가 ptr인 경우 */
 				else
-					parentNode->right = NULL;
+					parentNode->right = NULL; // 부모의 오른쪽 자식노드를 삭제
 
-				free(ptr);
+				free(ptr); // ptr에 할당된 메모리 해제
 			}
+            /* ptr이 리프노드가 아닌 경우 (삭제할 노드가 자식 노드를 한개 또는 두개 가진 경우) 경고문 출력 */
 			else {
 				printf("the node [%d] is not a leaf \n", ptr->key);
 			}
 			return 1;
 		}
 
-		/* keep the parent node */
-		parentNode = ptr;
+		parentNode = ptr; // parentNode가 ptr을 가리키게 함
+		
+        /* ptr의 key보다 삭제할 key가 큰 경우 */
+		if(ptr->key < key) 
+			ptr = ptr->right; // ptr을 오른쪽 자식노드로 이동
 
-		/* key comparison, if current node's key is greater than input key
-		 * then the new node has to be inserted into the right subtree;
-		 * otherwise the left subtree.
-		 */
-		if(ptr->key < key)
-			ptr = ptr->right;
+        /* ptr의 key보다 삭제할 key가 작은 경우 */        
 		else
-			ptr = ptr->left;
-
-
+			ptr = ptr->left; // ptr을 왼쪽 자식노드로 이동
 	}
-
+    
+    /* 리프노드까지 탐색했지만 삭제할 key를 찾지 못한 경우 경고문 출력 */
 	printf("Cannot find the node for key [%d]\n ", key);
 
 	return 1;
@@ -284,36 +286,45 @@ int deleteLeafNode(Node* head, int key)
 /* 특정 key의 노드가 있는지 재귀문으로 탐색하는 함수 */
 Node* searchRecursive(Node* ptr, int key)
 {
+    /* ptr의 값이 NULL이면, 즉 노드가 존재하지 않는 경우 NULL 반환 */
 	if(ptr == NULL)
 		return NULL;
 
+    /* ptr의 key보다 탐색할 key가 큰 경우 */
 	if(ptr->key < key)
-		ptr = searchRecursive(ptr->right, key);
-	else if(ptr->key > key)
-		ptr = searchRecursive(ptr->left, key);
+		ptr = searchRecursive(ptr->right, key); // 오른쪽 자식 노드를 방문하여 재귀적으로 탐색 수행
 
-	/* if ptr->key == key */
-	return ptr;
+    /* ptr의 key보다 탐색할 key가 작은 경우 */
+	else if(ptr->key > key)
+		ptr = searchRecursive(ptr->left, key); // 왼쪽 자식 노드를 방문하여 재귀적으로 탐색 수행 
+
+	/* 탐색할 key가 나온 경우 */
+	return ptr; // ptr을 반환
 
 }
 
 /* 특정 key의 노드가 있는지 반복문으로 탐색하는 함수 */
 Node* searchIterative(Node* head, int key)
 {
-	/* root node */
+	/* ptr이 head의 왼쪽 자식 노드를 가리키게 함 */
 	Node* ptr = head->left;
 
+    /* ptr이 NULL이 아닐 때까지, 즉 리프노드에 도달할 때 까지 반복 */
 	while(ptr != NULL)
 	{
+        /* 탐색할 key가 나온 경우 */
 		if(ptr->key == key)
-			return ptr;
+			return ptr; // ptr을 반환
 
-		if(ptr->key < key) ptr = ptr->right;
+        /* ptr의 key보다 탐색할 key가 큰 경우 */
+		if(ptr->key < key) ptr = ptr->right; // ptr을 오른쪽 자식 노드로 이동
+        /* ptr의 key보다 탐색할 key가 작은 경우 */
 		else
-			ptr = ptr->left;
+			ptr = ptr->left; // ptr을 왼쪽 자식 노드로 이동
 	}
 
-	return NULL;
+    /* 리프노드에 도달할때 까지도 탐색할 key를 찾지 못한 경우 */
+	return NULL; // NULL 반환
 }
 
 /* 특정 노드 아래의 모든 자식노드의 메모리를 해제하는 함수 */
