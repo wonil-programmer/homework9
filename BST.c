@@ -2,24 +2,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* 트리 노드 구조체 정의 */
+/* 트리 노드 구조체 (별칭은 Node) 정의 */
 typedef struct node {
 	int key;
 	struct node *left; // 왼쪽 노드를 가리키는 자기 참조 구조체 포인터
 	struct node *right; // 오른쪽 노드를 가리키는 자기 참조 구조체 포인터
 } Node;
 
-int initializeBST(Node** h);
-
 /* 함수 원형 정의 */
-// 순회 함수
+// 이진 탐색 트리 초기화 함수
+int initializeBST(Node** h);
+// 이진 탐색 트리 순회 함수
 void inorderTraversal(Node* ptr);	  
 void preorderTraversal(Node* ptr);    
 void postorderTraversal(Node* ptr);	  
-// 노드 삽입 삭제 함수
+// 노드 삽입 및 리프노드 삭제 함수
 int insert(Node* head, int key);  
 int deleteLeafNode(Node* head, int key);  
-// 트리 탐색 함수
+// 이진 탐색 트리 탐색 함수 (재귀, 반복)
 Node* searchRecursive(Node* ptr, int key);  
 Node* searchIterative(Node* head, int key); 
 // 메모리 초기화 함수
@@ -128,14 +128,14 @@ int initializeBST(Node** h) {
 
 	/* head에 메모리 할당 후 각 연결 노드 및 key 초기화 */
 	*h = (Node*)malloc(sizeof(Node));
-	(*h)->left = NULL;	/* root */
+	(*h)->left = NULL;	 
 	(*h)->right = *h;
 	(*h)->key = -9999;
 
 	return 1; 
 }
 
-/* BST를 중위순회하는 함수 */
+/* BST를 중위순회(왼쪽 자식노드 -> 부모노드 -> 오른쪽 자식노드 순)하는 함수 */
 void inorderTraversal(Node* ptr)
 {
     /* 노드가 존재하면 수행 */
@@ -146,7 +146,7 @@ void inorderTraversal(Node* ptr)
 	}
 }
 
-/* BST를 전위순회하는 함수 */
+/* BST를 전위순회(부모노드 -> 왼쪽 자식노드 -> 오른쪽 자식노드 순)하는 함수 */
 void preorderTraversal(Node* ptr)
 {   
     /* 노드가 존재하면 수행 */
@@ -157,7 +157,7 @@ void preorderTraversal(Node* ptr)
 	}
 }
 
-/* BST를 후위순회하는 함수 */
+/* BST를 후위순회(왼쪽 자식노드 -> 오른쪽 자식노드 -> 부모노드 순)하는 함수 */
 void postorderTraversal(Node* ptr)
 {   
     /* 노드가 존재하면 수행 */
@@ -177,14 +177,14 @@ int insert(Node* head, int key)
 	newNode->left = NULL;
 	newNode->right = NULL;
 
-    /* head의 왼쪽이 NULL인 경우 */
+    /* head의 왼쪽 자식노드가 NULL인 경우 */
 	if (head->left == NULL) {
 		head->left = newNode; // head의 왼쪽에 새로운 노드 삽입
 
 		return 1;
 	}
 
-	/* head->left is the root */
+	/* head의 왼쪽 자식노드가 NULL이 아닌 경우 */
 	Node* ptr = head->left; // ptr이 head의 왼쪽노드를 가리키게 함
 
 	Node* parentNode = NULL; // 노드 구조체 포인터 parentNode
@@ -259,6 +259,7 @@ int deleteLeafNode(Node* head, int key)
 
 				free(ptr); // ptr에 할당된 메모리 해제
 			}
+            
             /* ptr이 리프노드가 아닌 경우 (삭제할 노드가 자식 노드를 한개 또는 두개 가진 경우) 경고문 출력 */
 			else {
 				printf("the node [%d] is not a leaf \n", ptr->key);
